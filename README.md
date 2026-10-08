@@ -31,14 +31,16 @@ a4sx login
 
 | Command | What it does | a4sx interface it uses |
 |---|---|---|
-| `/a4sx:search <query>` | Searches published marketplace sessions. | MCP tools `search_sessions` and `get_session_summary` (no sign-in) |
+| `/a4sx:search <query>` | Searches published marketplace sessions. Claude Code asks before your query is sent to session-exchange.com. | MCP tools `search_sessions` and `get_session_summary` (no sign-in) |
 | `/a4sx:publish [title]` | Saves this session to your **private** library. Shows a scrub preview and asks before uploading. | CLI `a4sx push --dry-run`, then `a4sx push` |
 | `/a4sx:resume <listing-id>` | Adds a listing to your library and tells you how to continue it. | MCP `get_session_summary`, CLI `a4sx acquire`, then you run `a4sx launch --a4sx-session <id>` |
 | `/a4sx:help` | Explains a4sx and the commands. Claude also uses it on its own when you mention a4sx. | Points Claude at the agent brief `https://session-exchange.com/orient` |
 
 The plugin also registers the hosted a4sx MCP server, `https://session-exchange.com/mcp`, as `a4sx`
-(see `/mcp`). If you already added it yourself with `claude mcp add`, you will see it twice; you can
-remove your own entry.
+(see `/mcp`). If you already added the same server yourself with `claude mcp add`, Claude Code
+connects once and uses your entry, not the plugin's. The skills' pre-approved tool names then don't
+match, so Claude asks for permission on every call. Remove your entry (`claude mcp remove a4sx`) to
+let the plugin's skills use their pre-approved tools.
 
 `/a4sx:publish` and `/a4sx:resume` only run when you type them. Claude does not start an upload on
 its own.
