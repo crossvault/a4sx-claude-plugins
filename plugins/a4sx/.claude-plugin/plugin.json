@@ -1,0 +1,18 @@
+{
+  "name": "a4sx",
+  "displayName": "a4sx",
+  "version": "0.1.0",
+  "description": "Search shared coding-agent sessions on a4sx, save the current Claude Code session to your private library, and continue a session from the library.",
+  "author": {
+    "name": "crossVault GmbH",
+    "url": "https://session-exchange.com"
+  },
+  "homepage": "https://session-exchange.com",
+  "repository": "https://github.com/crossvault/a4sx-claude-plugins",
+  "license": "MIT",
+  "keywords": ["a4sx", "sessions", "session-library", "marketplace", "mcp"],
+  "documentationUrl": "https://github.com/crossvault/a4sx-claude-plugins#readme",
+  "supportUrl": "https://session-exchange.com/contact",
+  "privacyPolicyUrl": "https://session-exchange.com/privacy",
+  "termsOfServiceUrl": "https://session-exchange.com/terms"
+}

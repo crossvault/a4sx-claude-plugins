@@ -1,0 +1,15 @@
+{
+  "name": "a4sx",
+  "description": "The a4sx plugin for Claude Code: save, search and continue coding-agent sessions on a4sx (session-exchange.com).",
+  "owner": {
+    "name": "crossVault GmbH",
+    "url": "https://session-exchange.com"
+  },
+  "plugins": [
+    {
+      "name": "a4sx",
+      "source": "./plugins/a4sx",
+      "description": "Search shared sessions on a4sx, save the current session to your private library, and continue a session from the library."
+    }
+  ]
+}

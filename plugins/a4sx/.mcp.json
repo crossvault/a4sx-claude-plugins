@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "a4sx": {
+      "type": "http",
+      "url": "https://session-exchange.com/mcp"
+    }
+  }
+}
