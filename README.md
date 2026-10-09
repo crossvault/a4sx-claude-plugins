@@ -46,6 +46,18 @@ it (`claude mcp list` shows it).
 `/a4sx:publish` and `/a4sx:resume` only run when you type them. Claude does not start an upload on
 its own.
 
+## Services contacted outside the MCP connector
+
+The declared connector is the MCP server `https://session-exchange.com/mcp`. Some skills also reach
+the same first-party service, session-exchange.com, by other routes. No other service is contacted.
+
+| Skill | Route | What is sent | When |
+|---|---|---|---|
+| `/a4sx:publish` | the official a4sx CLI (`a4sx push`) to the session-exchange.com API | this session's transcript, scrubbed on your machine first, plus the title you choose | only after a `a4sx push --dry-run` preview, and only after Claude Code asks you: the upload is not pre-approved |
+| `/a4sx:resume` | the a4sx CLI (`a4sx acquire`, then you run `a4sx launch`) to the session-exchange.com API | the listing or session id you chose, and your CLI sign-in | `a4sx acquire` only after Claude Code asks you (it is not pre-approved); `a4sx launch` you run yourself |
+| `/a4sx:help` | WebFetch, limited to `session-exchange.com`, reading `https://session-exchange.com/orient` | nothing about you: a read of the public agent brief | when Claude needs the brief |
+| `/a4sx:publish`, `/a4sx:resume` | the CLI installer `https://session-exchange.com/install.sh` | nothing: a download | only if you run the installer yourself; the skills never run it |
+
 ## Sign in
 
 There are two ways to sign in. They are independent; use either or both.
