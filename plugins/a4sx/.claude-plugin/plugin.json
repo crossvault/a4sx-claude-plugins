@@ -11,6 +11,7 @@
   "repository": "https://github.com/crossvault/a4sx-claude-plugins",
   "license": "MIT",
   "keywords": ["a4sx", "sessions", "session-library", "marketplace", "mcp"],
+  "icon": "./icon.png",
   "documentationUrl": "https://github.com/crossvault/a4sx-claude-plugins#readme",
   "supportUrl": "https://session-exchange.com/contact",
   "privacyPolicyUrl": "https://session-exchange.com/privacy",
