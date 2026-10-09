@@ -29,3 +29,19 @@ All notable changes to this project are listed here. Versions follow
   live; use `a4sx list` instead.
 - `/a4sx:search` and `/a4sx:resume`: read `harness.id`, since `harness` is an object.
 - `/a4sx:resume`: explains why `a4sx push --latest` is fine there.
+
+### Changed (MCP sign-in is live)
+
+- README: MCP sign-in is described as live. Claude Code signs in to the `a4sx` server through
+  `/mcp` with a browser sign-in and consent page; a new "Sign in" section and a table of what needs
+  which sign-in replace the "after MCP sign-in goes live" table.
+- `/a4sx:search`: searches the user's own library (`scope=library`) when they ask for it and are
+  signed in; otherwise points them to `/mcp` or `a4sx list`.
+- `/a4sx:help`: lists the signed-in MCP tools without the "don't call them" rule, and says that
+  session text from `fetch_session_context` stays out of instruction files.
+- Wording: Claude Code asks before a search query is sent unless the tool is already allowed or
+  permission prompts are bypassed; `claude mcp remove` takes the name the user gave their own entry.
+- `/a4sx:resume`: `a4sx push --latest` picks the newest transcript across all projects, so the user
+  runs `a4sx push --latest --dry-run` first to see the path, then pushes that path.
+- `/a4sx:search`: library results are shown with their own fields, and their detail is read with
+  `get_session_summary` and `"source": "library"`.

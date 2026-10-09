@@ -31,7 +31,7 @@ a4sx login
 
 | Command | What it does | a4sx interface it uses |
 |---|---|---|
-| `/a4sx:search <query>` | Searches published marketplace sessions. Claude Code asks before your query is sent to session-exchange.com. | MCP tools `search_sessions` and `get_session_summary` (no sign-in) |
+| `/a4sx:search <query>` | Searches published marketplace sessions, or your own library once you are signed in. Your query is sent to session-exchange.com; Claude Code asks first unless the tool is already allowed or permission prompts are bypassed. | MCP tools `search_sessions` and `get_session_summary` (marketplace: no sign-in; your library: MCP sign-in) |
 | `/a4sx:publish [title]` | Saves this session to your **private** library. Shows a scrub preview and asks before uploading. | CLI `a4sx push --dry-run`, then `a4sx push` |
 | `/a4sx:resume <listing-id>` | Adds a listing to your library and tells you how to continue it. | MCP `get_session_summary`, CLI `a4sx acquire`, then you run `a4sx launch --a4sx-session <id>` |
 | `/a4sx:help` | Explains a4sx and the commands. Claude also uses it on its own when you mention a4sx. | Points Claude at the agent brief `https://session-exchange.com/orient` |
@@ -39,25 +39,39 @@ a4sx login
 The plugin also registers the hosted a4sx MCP server, `https://session-exchange.com/mcp`, as `a4sx`
 (see `/mcp`). If you already added the same server yourself with `claude mcp add`, Claude Code
 connects once and uses your entry, not the plugin's. The skills' pre-approved tool names then don't
-match, so Claude asks for permission on every call. Remove your entry (`claude mcp remove a4sx`) to
-let the plugin's skills use their pre-approved tools.
+match, so Claude asks for permission on every call. To let the plugin's skills use their
+pre-approved tools, remove your own entry with `claude mcp remove <name>`, using the name you gave
+it (`claude mcp list` shows it).
 
 `/a4sx:publish` and `/a4sx:resume` only run when you type them. Claude does not start an upload on
 its own.
 
-## What works today, and what needs MCP sign-in
+## Sign in
 
-| | Today | After MCP sign-in goes live |
-|---|---|---|
-| Search the marketplace, read summaries | MCP, no sign-in | same |
-| Save this session | CLI (`a4sx login`) | also MCP `publish_session` |
-| Add a listing to your library | CLI (`a4sx acquire`) | also MCP `acquire_session` |
-| Continue a session | CLI `a4sx launch --a4sx-session`, in a new Claude Code session | same; MCP `fetch_session_context` can also load a library session as context into the current conversation |
-| Search your own library | CLI `a4sx list` | also MCP `search_sessions` with `scope=library` |
+There are two ways to sign in. They are independent; use either or both.
 
-MCP sign-in (OAuth) is coming soon. When it is on, Claude Code offers the sign-in for the `a4sx`
-server itself (in `/mcp`). Until then, MCP tools that need an account return 401, and the plugin uses
-the CLI for those steps.
+- **MCP sign-in, from Claude Code.** Run `/mcp`, select the plugin's `a4sx` server and choose to
+  authenticate. Claude Code opens the a4sx sign-in in your browser (GitHub or Google), then a
+  consent page that names the client, the access it asks for and how long it lasts. After you approve,
+  Claude Code holds the access itself; you never copy a token. You can see and revoke the connection
+  under Account › Agent keys on session-exchange.com.
+- **CLI sign-in, in a terminal.** `a4sx login`, as above. `/a4sx:publish` and `/a4sx:resume` use the
+  CLI, so they need this sign-in.
+
+## What needs which sign-in
+
+| | No sign-in | MCP sign-in (`/mcp`) | CLI sign-in (`a4sx login`) |
+|---|---|---|---|
+| Search the marketplace, read summaries | MCP `search_sessions`, `get_session_summary` | same | |
+| Search your own library | | MCP `search_sessions` with `scope=library` | `a4sx list` |
+| Save this session | | MCP `publish_session` (up to 2 MiB) | `a4sx push`, used by `/a4sx:publish` |
+| Add a listing to your library | | MCP `acquire_session` | `a4sx acquire`, used by `/a4sx:resume` |
+| Load a library session as context into this conversation | | MCP `fetch_session_context` | |
+| Continue a session | | | `a4sx launch --a4sx-session`, in a new Claude Code session |
+
+A tool that needs more access than you approved answers that it needs it; Claude Code may then
+ask you to approve again in the browser. If it doesn't, sign in again from `/mcp`, or use the
+CLI for that step.
 
 Only **Claude Code** sessions can be continued today. Sessions recorded with other agents
 (Codex CLI, Gemini CLI, OpenCode) show up in search, but you can only view them on the web.
@@ -92,13 +106,11 @@ policy applies.
 
 ## Gaps
 
-These are things the plugin does not do, because no a4sx interface for them exists yet or because it
-is not live:
+These are things the plugin does not do, because no a4sx interface for them exists yet:
 
-- **No in-session sign-in until MCP OAuth is live.** Today sign-in is `a4sx login` in a terminal.
 - **No CLI search.** The CLI has no marketplace search, so search goes through MCP only.
 - **Continuing needs a new session.** `a4sx launch` starts a new Claude Code session, so a session
-  can't be continued inside the current one. After MCP sign-in, `fetch_session_context` can load one
+  can't be continued inside the current one. With MCP sign-in, `fetch_session_context` can load one
   as context here, which is not the same as resuming it.
 - **Publishing publicly** is a web-app step. Neither the CLI nor MCP lists a session publicly.
 - **Buying** is a web-app step. No tool pays.

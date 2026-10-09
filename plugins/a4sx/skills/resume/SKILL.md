@@ -16,7 +16,8 @@ buy anything.
 
 1. **Identify the listing.** If no id was given, ask for one or offer `/a4sx:search`. If the
    argument is not an id, search the public marketplace for it with `search_sessions`
-   (`"scope": "public"`; Claude Code asks the user before the query is sent) and let the user pick.
+   (`"scope": "public"`; Claude Code asks the user before the query is sent, unless the tool is
+   already allowed or permission prompts are bypassed) and let the user pick.
    Call `get_session_summary` with the id (and `tenant`, if known) and check:
    - the session is resumable (`resumable` is `true`; `harness.id` is `claude-code`). Only Claude Code sessions can be
      continued today. For any other harness, stop and say it can be viewed on the web only;
@@ -53,7 +54,10 @@ buy anything.
 
    This starts a new local copy; the library copy stays unchanged. The first run may ask for a
    launch profile. Warn the user that the transcript was written by another author: they should
-   read what it asks Claude to do before approving actions. When they are done,
-   `a4sx push --latest` saves their continuation to their library with its lineage. `--latest` is
-   fine here, unlike in `/a4sx:publish`: the user runs it in their own terminal right after leaving
-   the launched session, so that session is the most recently modified transcript.
+   read what it asks Claude to do before approving actions. When they are done, they can save
+   their continuation to their library with its lineage. `--latest` picks the most recently
+   modified Claude Code transcript across all projects, which is another session's if one was
+   active since, so have them check first:
+   1. `a4sx push --latest --dry-run` uploads nothing and prints the path it picked;
+   2. if that is the launched session's transcript, `a4sx push <that path>` saves it. An explicit
+      path keeps the lineage too.

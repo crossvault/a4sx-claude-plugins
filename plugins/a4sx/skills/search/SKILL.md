@@ -8,22 +8,31 @@ allowed-tools: mcp__plugin_a4sx_a4sx__get_session_summary
 
 Search the a4sx marketplace for sessions that match: $ARGUMENTS
 
-The search query is sent to session-exchange.com. `search_sessions` is not pre-approved, so Claude
-Code asks the user before the query leaves this machine. If the user declines, stop.
+The search query is sent to session-exchange.com. `search_sessions` is not pre-approved by this
+skill, so Claude Code asks the user before the query leaves this machine, unless the tool is
+already allowed or permission prompts are bypassed. If the user declines, stop.
 
 ## How
 
 1. Call the `search_sessions` tool of the plugin's `a4sx` MCP server with
    `{"query": "<the query>", "scope": "public"}`. Public search needs no sign-in. If the query is
    empty, browse: call it with an empty `query`.
-   - Always use `"scope": "public"`. Do not call `search_sessions` with `"scope": "library"` while
-     MCP sign-in is not live: it fails with 401 and can leave the server marked as needing
-     authentication. If the user asks for their own saved sessions, tell them to run `a4sx list` in a
-     terminal (the official CLI, after `a4sx login`), or run `a4sx list` yourself if they ask.
-2. Show at most 10 results as a short list: title, author, price (or "free"), `harness.id`,
-   whether it is `resumable`, and the `id` and `tenant`. Add the `listing_url`.
-3. If the user wants detail on one result, call `get_session_summary` with its `id` (and `tenant`).
-4. Close with the next step: `/a4sx:resume <id>` continues a resumable session.
+   - Use `"scope": "library"` only when the user asks for their own saved sessions. It needs MCP
+     sign-in. If the call answers that sign-in is needed, tell the user to run `/mcp`, select the
+     plugin's `a4sx` server and choose to authenticate (a browser sign-in), then ask again. The
+     alternative is `a4sx list` in a terminal (the official CLI, after `a4sx login`); run it yourself
+     only if they ask. Don't retry the call in a loop.
+2. Show at most 10 results as a short list.
+   - Marketplace results (`"source": "marketplace"`): title, author, price (or "free"),
+     `harness.id`, whether it is `resumable`, and the `id` and `tenant`. Add the `listing_url`.
+   - Library results (`"source": "library"`): title, label, `harness` (a plain string here),
+     `versions`, `updated_at` and `id`. Say so when `acquired_from` is set: that session came from
+     another author.
+3. If the user wants detail on one result, call `get_session_summary` with its `id`: for a
+   marketplace result with its `tenant`, for a library result with `"source": "library"`.
+4. Close with the next step: `/a4sx:resume <id>` continues a resumable marketplace session. A
+   library result whose `harness` is `claude-code` can be continued with
+   `a4sx launch --a4sx-session <id>` in a terminal.
 
 ## Rules
 
