@@ -48,15 +48,21 @@ its own.
 
 ## Services contacted outside the MCP connector
 
-The declared connector is the MCP server `https://session-exchange.com/mcp`. Some skills also reach
-the same first-party service, session-exchange.com, by other routes. No other service is contacted.
+The declared connector is the MCP server `https://session-exchange.com/mcp`. Outside it, the skills
+themselves reach only the same first-party service, session-exchange.com, by the routes below. Two
+commands the skills tell you to run yourself go further, as the last two rows say: `a4sx login` can
+hand off to the sign-in provider you choose, and `a4sx launch` sends the continued session to the
+model provider in your launch profile.
 
 | Skill | Route | What is sent | When |
 |---|---|---|---|
-| `/a4sx:publish` | the official a4sx CLI (`a4sx push`) to the session-exchange.com API | this session's transcript, scrubbed on your machine first, plus the title you choose | only after a `a4sx push --dry-run` preview, and only after Claude Code asks you: the upload is not pre-approved |
-| `/a4sx:resume` | the a4sx CLI (`a4sx acquire`, then you run `a4sx launch`) to the session-exchange.com API | the listing or session id you chose, and your CLI sign-in | `a4sx acquire` only after Claude Code asks you (it is not pre-approved); `a4sx launch` you run yourself |
+| `/a4sx:publish` | the official a4sx CLI (`a4sx push`) to the session-exchange.com API | this session's transcript, scrubbed on your machine first, plus the title you choose | only after a `a4sx push --dry-run` preview (which sends nothing), and only after Claude Code asks you: the upload is not pre-approved |
+| `/a4sx:resume` | the a4sx CLI (`a4sx acquire`) to the session-exchange.com API | the listing id (and tenant) you chose, and your CLI sign-in | only after Claude Code asks you; it is not pre-approved |
+| `/a4sx:search` | the a4sx CLI (`a4sx list`) to the session-exchange.com API | your CLI sign-in | only if you ask for your own library, and only after Claude Code asks you |
 | `/a4sx:help` | WebFetch, limited to `session-exchange.com`, reading `https://session-exchange.com/orient` | nothing about you: a read of the public agent brief | when Claude needs the brief |
-| `/a4sx:publish`, `/a4sx:resume` | the CLI installer `https://session-exchange.com/install.sh` | nothing: a download | only if you run the installer yourself; the skills never run it |
+| `/a4sx:publish`, `/a4sx:resume` | the CLI installer `https://session-exchange.com/install.sh` | nothing: a download | only if you run it, or ask Claude to; the skills don't run it on their own |
+| all skills that use the CLI | `a4sx login`: a browser sign-in at session-exchange.com | your sign-in, through the provider you pick there (for example Google, GitHub or Microsoft) | only when you run it |
+| `/a4sx:resume` | `a4sx launch`: downloads the session from session-exchange.com, then starts Claude Code with your launch profile | the continued session goes to the model provider in that profile (Anthropic by default) | only when you run it in a terminal |
 
 ## Sign in
 
