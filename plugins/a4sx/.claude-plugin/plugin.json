@@ -2,7 +2,7 @@
   "name": "a4sx",
   "displayName": "a4sx",
   "version": "0.2.0",
-  "description": "Search shared coding-agent sessions on a4sx, save the current Claude Code session to your private library, continue a session from the library, and see and manage your a4sx meshes and cells with the official a4sx CLI.",
+  "description": "Search and add coding-agent sessions from the a4sx marketplace, save the current Claude Code session to your private library, work with your library and launch profiles, continue a session, and see and manage your a4sx meshes and cells.",
   "author": {
     "name": "crossVault GmbH",
     "url": "https://session-exchange.com"

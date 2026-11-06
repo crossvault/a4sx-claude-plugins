@@ -1,6 +1,6 @@
 ---
-description: Create an a4sx mesh, create an invite, set a mesh's traffic policy, or rename or stop a mesh cell on this computer, with the official a4sx CLI, each only after the user's explicit yes. Gives the commands for joining a mesh and allowing a peer, which the user runs in their own terminal.
-argument-hint: "<create|invite|policy|rename|stop|join|allow> [args]"
+description: Create an a4sx mesh, create or revoke an invite, answer a join request, set a mesh's traffic policy, or rename, stop, set as default or forget a mesh cell on this computer, with the official a4sx CLI, each only after the user's explicit yes. Gives the commands for joining and leaving a mesh and allowing a peer, which the user runs in their own terminal.
+argument-hint: "<create|invite|revoke|approve|policy|rename|stop|default|forget|join|leave|allow> [args]"
 disable-model-invocation: true
 allowed-tools: Bash(printenv A4SX_HARNESS A4SX_MESH_SESSION)
 ---
@@ -22,9 +22,10 @@ browser, it prints the confirmation page's address; give it to the user and don'
 ## Step 0: check where this runs
 
 Run `printenv A4SX_HARNESS A4SX_MESH_SESSION`. If it prints anything, this Claude Code session runs
-inside an a4sx session: the a4sx CLI here acts as that session, not as the user. Stop, and tell the
-user to make mesh changes in their own terminal, outside the a4sx session. If it prints nothing (it
-then exits with status 1, which is expected), go on. If `a4sx` is not found, suggest `/a4sx:setup`.
+inside an a4sx session: in a mesh cell the a4sx CLI can't read the user's sign-in, and in an `a4sx
+launch --ipc-proxy` session its saved state is read-only. Stop, and tell the user to make mesh
+changes in their own terminal, outside the a4sx session. If it prints nothing (it then exits with
+status 1, which is expected), go on. If `a4sx` is not found, suggest `/a4sx:setup`.
 
 ## Changes this skill runs (after a yes)
 
@@ -42,9 +43,9 @@ then exits with status 1, which is expected), go on. If `a4sx` is not found, sug
 
 - **Create an invite.** Command: `a4sx mesh invite <mesh>`, with only the options the user asks for:
   `--max-uses <1-50>` (default 1), `--expires <e.g. 12h or 7d>` (default 7d, at most 30d),
-  `--email <address>` (only that verified account may use it), `--note "<text>"`. Add
-  `--role admin` only if the user asks for it, and say first that an admin can invite others and
-  manage the mesh. The user confirms the invite in the browser, which shows the invite link once.
+  `--email <address>` (only that verified account may use it), `--note "<text>"` (at most 140
+  characters; shown to the person on their confirm page). Add `--role admin` only if the user asks
+  for it, and say first that an admin can invite others and manage the mesh. The user confirms the invite in the browser, which shows the invite link once.
   The CLI never prints the link. **Never ask for the link, never repeat it, and never put it in the
   chat or a file.** The user sends it to the person directly.
 
@@ -64,6 +65,24 @@ then exits with status 1, which is expected), go on. If `a4sx` is not found, sug
   `--mesh <mesh id>` when needed). Say first that this ends that cell's running agent session.
   `/a4sx:mesh` shows which cells run here.
 
+- **Revoke an invite** (mesh admins). `/a4sx:mesh` lists the invites with their ids. Command:
+  `a4sx mesh invite <mesh> --revoke <invite id>`. Nobody can use that invite afterwards.
+
+- **Approve or deny a join request** (mesh admins). `/a4sx:mesh` lists the pending requests with
+  their ids. Command: `a4sx mesh approve <mesh> <request id>`, or to deny it,
+  `a4sx mesh approve <mesh> <request id> --deny [--reason "<shown to the requester>"]`. Say first
+  that approving makes that person a member, whose cells can then message cells in the mesh as its
+  policy allows. The user confirms it in the browser.
+
+- **Set the default cell** on this computer. Command: `a4sx mesh cell default <name>` (add
+  `--mesh <mesh id>` when needed). A bare `a4sx launch --cell` then starts that cell. It changes
+  only this computer's cell list.
+
+- **Forget a cell on this computer.** Command: `a4sx mesh cell forget <name>` (add
+  `--mesh <mesh id>` when needed). Say first that it deletes the cell's key from this computer, so
+  this computer can't start that cell any more, and that the cell stays in the user's account until
+  they remove it in the mesh console on session-exchange.com.
+
 ## Commands only for the user's own terminal
 
 Don't run these. Give the command and tell the user to run it in their own terminal, outside Claude
@@ -72,12 +91,16 @@ Code:
 - **Join a mesh with an invite:** `a4sx mesh join -`. It reads the invite link hidden, so it stays
   out of this conversation and out of the shell history. Then the user confirms the join text. To ask
   a mesh's admins instead: `a4sx mesh join <mesh> --request --message "<short note>"`.
+- **Leave a mesh:** `a4sx mesh leave <mesh>`. The CLI asks a question before it leaves, which only
+  works in a terminal. Leaving disconnects the user's sessions in that mesh, and they need a new
+  invite to come back.
 - **Allow one agent to message another:** `a4sx mesh allow <agent A> <agent B>` (only A may start;
   `--both` for either side, `--for 30d` to expire). Granting a peer is the owner's decision, so the
   CLI refuses it inside Claude Code or any agent session.
 
-Other changes (leaving a mesh, approving join requests, revoking invites, removing a cell from this
-computer) are done with `a4sx mesh …` in a terminal or in the mesh console on session-exchange.com.
+Other changes (for example a new cell, pairing this computer, or removing a cell from the account)
+are done with `a4sx` in a terminal or in the mesh console on session-exchange.com. For a new cell,
+`/a4sx:cell` gives the command.
 
 ## Rules
 

@@ -9,7 +9,7 @@
     {
       "name": "a4sx",
       "source": "./plugins/a4sx",
-      "description": "Search shared sessions on a4sx, save the current session to your private library, continue a session from the library, and see and manage your a4sx meshes and cells."
+      "description": "Search and add sessions from the a4sx marketplace, save the current session to your private library, work with your library and launch profiles, continue a session, and see and manage your a4sx meshes and cells."
     }
   ]
 }

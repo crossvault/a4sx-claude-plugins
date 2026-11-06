@@ -28,6 +28,29 @@ All notable changes to this project are listed here. Versions follow
 - README: examples, the Windows installer, what the plugin pre-approves, every service the new
   commands contact, and how purchases work (`request_purchase` charges nothing; the user confirms
   and pays in the browser; the plugin never pre-approves it).
+- `/a4sx:acquire`: adds a free listing to the library after the user's yes (MCP `acquire_session`,
+  or `a4sx acquire`). For a paid listing it starts a purchase request (`request_purchase`) only after
+  the user's yes, shows the link and code, and checks the result (`get_purchase_request`) only when
+  the user says they are done. The user confirms and pays in the browser.
+- `/a4sx:save-summary`: Claude composes a markdown summary of this session, the user checks and
+  approves it, and it is saved privately with MCP `publish_session` (`format=markdown`). No CLI
+  needed; the transcript is not uploaded.
+- `/a4sx:library`: lists and shows saved sessions, suggests listing fields
+  (`suggest_listing_draft`), deletes a saved session (`a4sx delete`) and signs the CLI out
+  (`a4sx logout`); deleting and signing out only after the user's yes.
+- `/a4sx:context`: loads a library session as reference material (`fetch_session_context`), never
+  into instruction files.
+- `/a4sx:profiles`: lists and shows launch profiles (`a4sx profiles --json`, never header or env
+  values) and copies, sets the default or deletes one after the user's yes. Other profile edits are
+  given as commands for the user's terminal, because they print the whole profile.
+- `/a4sx:world-sim`: shows World-Sim templates, the user's World-Sims and how an agent gets access
+  (`list_world_sim_templates`, `list_my_modules`, `get_world_sim_access`). Read-only.
+- `/a4sx:search`: sort, tag and harness filters, and the rating, imports, version, verified and
+  deprecated state in a listing's detail.
+- `/a4sx:mesh`: also shows a mesh's members, join requests and invites (never invite links).
+- `/a4sx:mesh-manage`: also revokes invites, approves or denies join requests, sets the default
+  cell and forgets a cell on this computer. Leaving a mesh is given as a command for the user's
+  terminal.
 
 ### Changed
 
@@ -38,6 +61,14 @@ All notable changes to this project are listed here. Versions follow
 - `/a4sx:publish`: the Windows installer is mentioned next to `install.sh`.
 - README: removed "No CLI search" (the CLI has `a4sx search` now).
 - SECURITY.md: MCP sign-in is live; the plugin has no hooks.
+- The in-session check says what differs: in a mesh cell the CLI can't read the user's sign-in; in
+  an `a4sx launch --ipc-proxy` session its saved state is read-only.
+- `/a4sx:resume`: says that `--seed-only` also keeps a copy and a lineage note in the CLI's folder,
+  and that a session from another author is opened with permission prompts on, never bypassed.
+- `/a4sx:cell`: cells need reduced isolation with CLI 0.25.0; if the user declines, the skill says
+  the session can't run as a cell and offers `/a4sx:resume` instead.
+- README: `a4sx version` asks session-exchange.com for the server version (`GET /healthz`, no
+  sign-in); listed with the pre-approved commands and in the services table.
 
 ## [0.1.0] - 2026-10-09
 

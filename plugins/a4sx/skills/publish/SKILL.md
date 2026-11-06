@@ -17,9 +17,10 @@ scrubs it again before storing it.
 ## Steps
 
 0. **Check where this runs.** Run `printenv A4SX_HARNESS A4SX_MESH_SESSION`. If it prints anything,
-   this Claude Code session runs inside an a4sx session: the a4sx CLI here acts as that session, not
-   as the user. Stop, and tell the user to save it from their own terminal, outside the a4sx session.
-   If it prints nothing (it then exits with status 1, which is expected), go on.
+   this Claude Code session runs inside an a4sx session: in a mesh cell the a4sx CLI can't read the
+   user's sign-in, and in an `a4sx launch --ipc-proxy` session its saved state is read-only. Stop,
+   and tell the user to save it in their own terminal, outside the a4sx session. If it prints
+   nothing (it then exits with status 1, which is expected), go on.
 
 1. **Check the CLI.** Run `a4sx version`. If the command is not found, stop and tell the user to
    install it in a terminal (it needs Python 3.10 or newer); `/a4sx:setup` shows how:
@@ -29,7 +30,8 @@ scrubs it again before storing it.
    ```
 
    On Windows (PowerShell): `irm https://session-exchange.com/install.ps1 | iex`.
-   Do not run the installer yourself unless the user asks you to.
+   Do not run the installer yourself unless the user asks you to. Without the CLI, the user can save
+   a written summary of this session instead, with `/a4sx:save-summary`.
 
 2. **Find the transcript.** Claude Code stores this session as
    `~/.claude/projects/<project-folder>/${CLAUDE_SESSION_ID}.jsonl` (under `$CLAUDE_CONFIG_DIR/projects/`

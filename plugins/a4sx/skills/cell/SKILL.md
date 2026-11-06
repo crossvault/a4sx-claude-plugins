@@ -17,9 +17,10 @@ Linux and Windows (native, WSL, Remote-SSH or a dev container), as the a4sx CLI 
 ## Steps
 
 0. **Check where this runs.** Run `printenv A4SX_HARNESS A4SX_MESH_SESSION`. If it prints anything,
-   this Claude Code session already runs inside an a4sx session. Stop, and tell the user to start
-   cells from their own terminal, outside the a4sx session. If it prints nothing (it then exits with
-   status 1, which is expected), go on.
+   this Claude Code session runs inside an a4sx session: in a mesh cell the a4sx CLI can't read the
+   user's sign-in, and in an `a4sx launch --ipc-proxy` session its saved state is read-only. Stop,
+   and tell the user to start cells in their own terminal, outside the a4sx session. If it prints
+   nothing (it then exits with status 1, which is expected), go on.
 
 1. **Which session.** Ask, unless the arguments say:
    - **this session** (id `${CLAUDE_SESSION_ID}`), continued in the current folder; or
@@ -35,13 +36,17 @@ Linux and Windows (native, WSL, Remote-SSH or a dev container), as the a4sx CLI 
 3. **Reduced isolation.** Explain, in these words: "Where this computer can't sandbox your agent, a
    cell runs as your own user. Your agent could then act as that cell in its mesh, skip the cell's
    outgoing checks, and read and use the a4sx sign-ins and keys saved on this computer." Ask whether
-   to allow that for this start (`--mesh-reduced-isolation`). Where the sandbox works, the flag
-   doesn't apply. A session from the library is fetched with the user's a4sx sign-in, so it needs
-   the flag; without it the CLI refuses to start it.
+   to allow that for this start (`--mesh-reduced-isolation`).
+
+   With the a4sx CLI 0.25.0 every cell needs it: there is no sandbox for cells yet, on Linux or on
+   Windows. If the user says no, say plainly that the session can't run as a cell then, and don't
+   build the cell command. Offer what works without a mesh instead: for a library session,
+   `/a4sx:resume <library id>` (or `a4sx launch --a4sx-session <library id>` in a terminal); for
+   this session, keep working here.
 
 4. **Give the command.** Put it together from the answers and show it in a code block:
    - this session, a stored cell:
-     `a4sx launch --cell <name> [--mesh <mesh id>] [--mesh-reduced-isolation] -- --resume ${CLAUDE_SESSION_ID}`
+     `a4sx launch --cell <name> [--mesh <mesh id>] --mesh-reduced-isolation -- --resume ${CLAUDE_SESSION_ID}`
    - a library session, a stored cell:
      `a4sx launch --cell <name> [--mesh <mesh id>] --mesh-reduced-isolation --a4sx-session=<library id>`
    - a new cell: the same, with `--new-cell` in place of `--cell <name> [--mesh <mesh id>]`.

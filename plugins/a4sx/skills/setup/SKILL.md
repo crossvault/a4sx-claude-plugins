@@ -11,9 +11,10 @@ The user wants to check, install or update the official `a4sx` CLI.
 ## Steps
 
 0. **Check where this runs.** Run `printenv A4SX_HARNESS A4SX_MESH_SESSION`. If it prints anything,
-   this Claude Code session runs inside an a4sx session: the a4sx CLI here belongs to that session.
-   Stop, and tell the user to check or update a4sx in their own terminal, outside the a4sx session.
-   If it prints nothing (it then exits with status 1, which is expected), go on.
+   this Claude Code session runs inside an a4sx session: in a mesh cell the a4sx CLI can't read the
+   user's sign-in, and in an `a4sx launch --ipc-proxy` session its saved state is read-only. Stop,
+   and tell the user to check or update a4sx in their own terminal, outside the a4sx session. If it
+   prints nothing (it then exits with status 1, which is expected), go on.
 
 1. **Check the CLI.** Run `a4sx version`. It prints the CLI version and the server version.
    - **Found:** tell the user the version. The mesh and cell commands of this plugin
