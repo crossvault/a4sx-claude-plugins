@@ -21,7 +21,9 @@ already allowed or permission prompts are bypassed. If the user declines, stop.
      sign-in. If the call answers that sign-in is needed, tell the user to run `/mcp`, select the
      plugin's `a4sx` server and choose to authenticate (a browser sign-in), then ask again. The
      alternative is `a4sx list` in a terminal (the official CLI, after `a4sx login`); run it yourself
-     only if they ask. Don't retry the call in a loop.
+     only if they ask, and not when `printenv A4SX_HARNESS A4SX_MESH_SESSION` prints anything (then
+     this runs inside an a4sx session, and the CLI would act as that session). Don't retry the call
+     in a loop.
 2. Show at most 10 results as a short list.
    - Marketplace results (`"source": "marketplace"`): title, author, price (or "free"),
      `harness.id`, whether it is `resumable`, and the `id` and `tenant`. Add the `listing_url`.
@@ -30,9 +32,8 @@ already allowed or permission prompts are bypassed. If the user declines, stop.
      another author.
 3. If the user wants detail on one result, call `get_session_summary` with its `id`: for a
    marketplace result with its `tenant`, for a library result with `"source": "library"`.
-4. Close with the next step: `/a4sx:resume <id>` continues a resumable marketplace session. A
-   library result whose `harness` is `claude-code` can be continued with
-   `a4sx launch --a4sx-session <id>` in a terminal.
+4. Close with the next step: `/a4sx:resume <id>` continues a resumable marketplace session, and a
+   library result whose `harness` is `claude-code` (say that it is from the library).
 
 ## Rules
 

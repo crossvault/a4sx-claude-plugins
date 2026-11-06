@@ -3,7 +3,43 @@
 All notable changes to this project are listed here. Versions follow
 [Semantic Versioning](https://semver.org/).
 
-## [0.1.0] - unreleased
+## [0.2.0] - 2026-11-06
+
+### Added
+
+- `/a4sx:setup`: checks the a4sx CLI, shows the installer for Linux, macOS and WSL
+  (`install.sh`) and for Windows (`install.ps1`, which skips the Microsoft Store Python), explains
+  `a4sx login`, and runs `a4sx update` only after the user's yes.
+- `/a4sx:mesh`: shows the user's meshes, a mesh's card, traffic policy and agent sessions (peers),
+  and the cells stored on this computer (`a4sx mesh list/show/policy/peers/cells`). Read-only; no
+  command is pre-approved.
+- `/a4sx:mesh-manage`: creates a mesh or an invite, sets a mesh's traffic policy, renames or stops a
+  cell, one change at a time and each after the user's yes. Setting `open` says that every member's
+  cells can then message each other. Joining a mesh and `a4sx mesh allow` are given as commands for
+  the user's own terminal; invite links and cell codes never go through the chat.
+- `/a4sx:cell`: puts together the `a4sx launch --cell …` command that runs this session, or a
+  library session, as a cell, after explaining reduced isolation. The user runs it in a terminal.
+- `/a4sx:resume`: continues a session in Claude Code's local history for the current folder
+  (`a4sx launch --a4sx-session … --seed-only`, after the user's yes), or in a terminal with a launch
+  profile picked from `a4sx profiles --json`. Library ids work too.
+- Skills that use the CLI first check whether Claude Code runs inside an a4sx session
+  (`printenv A4SX_HARNESS A4SX_MESH_SESSION`), and then tell the user to run a4sx in their own
+  terminal.
+- README: examples, the Windows installer, what the plugin pre-approves, every service the new
+  commands contact, and how purchases work (`request_purchase` charges nothing; the user confirms
+  and pays in the browser; the plugin never pre-approves it).
+
+### Changed
+
+- `/a4sx:help` no longer reads anything from the web: the facts it needs are in the skill, and the
+  plugin no longer pre-approves any web fetch.
+- No skill ever adds `--auto-allow-ipc-messages`. If the user asks about it, the skills give the flag
+  with its warning.
+- `/a4sx:publish`: the Windows installer is mentioned next to `install.sh`.
+- README: removed "No CLI search" (the CLI has `a4sx search` now).
+- SECURITY.md: MCP sign-in is live; the plugin has no hooks.
+
+## [0.1.0] - 2026-10-09
 
 ### Added
 
