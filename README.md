@@ -6,14 +6,14 @@ plugin brings it into Claude Code:
 - **Save** the current Claude Code session to your private a4sx library: the transcript, or a
   written summary you approve.
 - **Your library:** list and inspect your saved sessions, load one into the conversation as
-  reference material, suggest listing fields for selling one, or delete one.
+  reference material, or delete one.
 - **Marketplace:** search published sessions with their ratings, add a free listing to your library,
   or start a purchase that you confirm and pay for in your browser.
 - **Continue** a session: pick it up in Claude Code, in this folder or in a new terminal session.
 - **Meshes and cells:** see your a4sx meshes, their members, cells, join requests and invites, and
   the cells on this computer; create a mesh or an invite, answer join requests, set a mesh's policy,
   manage this computer's cells, and run a session as a cell.
-- **Launch profiles** and **World-Sims**: see them, and manage your launch profiles.
+- **Launch profiles:** see them, and copy one, set the default or delete one.
 
 Every upload, purchase request and change runs only after you say yes.
 
@@ -71,10 +71,10 @@ to a file.
 | Command | What it does | a4sx interface it uses | Changes on your computer |
 |---|---|---|---|
 | `/a4sx:search <query>` | Searches published marketplace sessions (with rating, imports and price), or your own library once you are signed in. Your query is sent to session-exchange.com; Claude Code asks first unless the tool is already allowed or permission prompts are bypassed. | MCP tools `search_sessions` and `get_session_summary` (marketplace: no sign-in; your library: MCP sign-in) | none |
-| `/a4sx:acquire <listing-id>` | Adds a listing to your library. Free: after your yes. Paid: after your yes it starts a purchase request; you check the code, confirm and pay in your browser. | MCP `get_session_summary`, `acquire_session`, `request_purchase`, `get_purchase_request`; or CLI `a4sx acquire` | none |
+| `/a4sx:acquire <listing-id>` | Adds a listing to your library after your yes. If the server answers that it is paid, it offers a purchase request; after another yes it starts one, and you check the code, confirm and pay in your browser. | MCP `get_session_summary`, `acquire_session`, `request_purchase`, `get_purchase_request`; or CLI `a4sx acquire` | none |
 | `/a4sx:publish [title]` | Saves this session's transcript to your **private** library. Shows a scrub preview and asks before uploading. | CLI `a4sx push --dry-run`, then `a4sx push` | none |
 | `/a4sx:save-summary [title]` | Claude writes a markdown summary of this session; you see it, change it and approve it; then it is saved to your **private** library. No CLI needed. | MCP `publish_session` (`format=markdown`) | none |
-| `/a4sx:library …` | Lists and shows your saved sessions, suggests listing fields for one of your sessions, deletes a saved session, or signs the CLI out. | MCP `search_sessions` (`scope=library`), `get_session_summary`, `suggest_listing_draft`; CLI `a4sx list`, `a4sx delete`, `a4sx logout` | with your yes: `a4sx logout` removes the CLI sign-in from this computer |
+| `/a4sx:library …` | Lists and shows your saved sessions, deletes a saved session, or signs the CLI out. When the server offers it, it also suggests listing fields for one of your sessions. | MCP `search_sessions` (`scope=library`), `get_session_summary`, and `suggest_listing_draft` when offered; CLI `a4sx list`, `a4sx delete`, `a4sx logout` | with your yes: `a4sx logout` always removes the CLI sign-in from this computer |
 | `/a4sx:context <library-id>` | Loads a library session into this conversation as reference material, sized to a token budget. | MCP `fetch_session_context` | none |
 | `/a4sx:resume <id>` | Adds a listing to your library and continues it: in Claude Code's history for this folder, or in a terminal with a launch profile you pick. | MCP `get_session_summary`, CLI `a4sx acquire`, `a4sx launch --a4sx-session … --seed-only`, `a4sx profiles --json`; you run `a4sx launch --a4sx-session <id>` | with your yes: a new session in Claude Code's local history for this folder, plus a copy of the downloaded session and a lineage note in the a4sx CLI's folder (`~/.config/a4sx/cache/`, `~/.config/a4sx/lineage/`) |
 | `/a4sx:profiles …` | Lists and shows your launch profiles (never header or env values), and copies one, makes one the default or deletes one. | CLI `a4sx profiles --json`, `a4sx profile --copy`, `--set-default`, `--delete` | none (profiles are stored in your account) |
@@ -82,7 +82,6 @@ to a file.
 | `/a4sx:mesh [mesh]` | Shows your meshes, a mesh's card, policy, members, agent sessions (peers), join requests and invites, and the cells stored on this computer. Read-only. | CLI `a4sx mesh list`, `mesh show`, `mesh policy` (show only), `mesh members`, `mesh peers`, `mesh requests`, `mesh invite --list`, `mesh cells` | none |
 | `/a4sx:mesh-manage …` | Creates a mesh, creates or revokes an invite, approves or denies a join request, sets a mesh's traffic policy, renames, stops, sets as default or forgets a cell, one change at a time. Gives you the commands to join or leave a mesh and to allow a peer, for your own terminal. | CLI `a4sx mesh create`, `mesh invite`, `mesh invite --revoke`, `mesh approve`, `mesh policy <mesh> <policy>`, `mesh cell rename`, `mesh cell stop`, `mesh cell default`, `mesh cell forget` | with your yes: renames, stops or sets the default cell, or deletes a cell's key from this computer |
 | `/a4sx:cell` | Puts together the `a4sx launch --cell …` command that runs this session, or a library session, as a cell. You run it in your own terminal. | CLI `a4sx mesh cells --json` | none (you run the launch) |
-| `/a4sx:world-sim` | Shows the World-Sim templates, your World-Sims and how an agent gets access to one. Read-only. | MCP `list_world_sim_templates`, `list_my_modules`, `get_world_sim_access` | none |
 | `/a4sx:help` | Explains a4sx and the commands. Claude also uses it on its own when you mention a4sx. | none | none |
 
 The plugin also registers the hosted a4sx MCP server, `https://session-exchange.com/mcp`, as `a4sx`
@@ -109,8 +108,11 @@ and change included, needs your permission when Claude Code asks:
 
 Only `/a4sx:help`, `/a4sx:search` and `/a4sx:mesh` can be used by Claude on its own; all three
 only read, and Claude Code still asks before each search query and each `a4sx mesh` command. Every
-other command runs only when you type it. Claude does not start an upload, a purchase request or a
-change on its own. The plugin has no hooks and runs nothing in the background.
+other command runs only when you type it. Before an upload, a purchase request or a change, two
+things happen: the skill asks you for an explicit yes, and Claude Code asks your permission for the
+MCP tool call or CLI command itself, because none of them is pre-approved (unless you allowed that
+tool yourself or bypass permission prompts). The plugin has no hooks and runs nothing in the
+background.
 
 **Inside an a4sx session.** If Claude Code itself runs inside an a4sx session, the a4sx CLI there
 works differently: in a mesh cell it can't read your sign-in, and in an `a4sx launch --ipc-proxy`
@@ -122,8 +124,9 @@ run by Claude: the plugin gives you the command for your own terminal. Invite li
 never go through the chat. The plugin never turns on `--auto-allow-ipc-messages`, which delivers
 mesh peers' messages to Claude without asking you; if you ask about it, it explains the risk.
 
-**Buying.** No command in this plugin pays. For a paid listing, `/a4sx:acquire` can call the MCP
-tool `request_purchase`, only after you say yes: it charges nothing itself and returns a link and a
+**Buying.** No command in this plugin pays. `/a4sx:acquire` first asks the server to add the
+listing (`acquire_session`). Only if the server answers that it is paid can it call the MCP tool
+`request_purchase`, and only after you say yes: it charges nothing itself and returns a link and a
 code; you check them, confirm and pay in your browser, on session-exchange.com. The plugin never
 pre-approves it, so Claude Code asks you before Claude can call it. No skill asks for payment
 details.
@@ -152,7 +155,7 @@ provider in your launch profile.
 | `/a4sx:profiles` | `a4sx profile --copy`, `--set-default` and `--delete` to the session-exchange.com API | your CLI sign-in, the profile ids, and for a copy an optional router operator name | only after your yes and Claude Code's question |
 | `/a4sx:search`, `/a4sx:library` | `a4sx list` to the session-exchange.com API | your CLI sign-in | only if you ask for your library through the CLI, after Claude Code asks you |
 | `/a4sx:library` | `a4sx delete` to the session-exchange.com API | your CLI sign-in and the id of the entry to delete | only after your yes and Claude Code's question |
-| `/a4sx:library` | `a4sx logout`: revokes the CLI sign-in on session-exchange.com | your CLI sign-in, to revoke it | only after your yes and Claude Code's question |
+| `/a4sx:library` | `a4sx logout`: asks session-exchange.com to revoke the CLI sign-in (best effort), then removes it from this computer in any case | your CLI sign-in, to revoke it | only after your yes and Claude Code's question |
 | `/a4sx:setup` | `a4sx update`: downloads the newest CLI from session-exchange.com | nothing: a download, without your sign-in | only after your yes and Claude Code's question |
 | `/a4sx:mesh` | `a4sx mesh list`, `mesh show`, `mesh policy` (show only), `mesh members`, `mesh peers`, `mesh requests` and `mesh invite --list` to the session-exchange.com API | your CLI sign-in and the mesh you asked about | each only after Claude Code asks you |
 | `/a4sx:mesh`, `/a4sx:cell` | `a4sx mesh cells --json`: reads the cells stored on this computer and asks session-exchange.com about them | your CLI sign-in | each only after Claude Code asks you |
@@ -186,12 +189,10 @@ There are two ways to sign in. They are independent; use either or both.
 | Add a free listing to your library | | MCP `acquire_session` | `a4sx acquire` |
 | Start a purchase of a paid listing (you pay in the browser) | | MCP `request_purchase`, `get_purchase_request` | |
 | Load a library session as context into this conversation | | MCP `fetch_session_context` | |
-| Suggest listing fields for one of your sessions | | MCP `suggest_listing_draft` | |
 | Delete a saved session | | | `a4sx delete` |
 | Continue a session | | | `a4sx launch --a4sx-session`, with `--seed-only` for Claude Code's history |
 | Launch profiles | | | `a4sx profiles`, `a4sx profile` |
 | Meshes and cells | | | `a4sx mesh …`, used by `/a4sx:mesh`, `/a4sx:mesh-manage` and `/a4sx:cell` |
-| World-Sims | MCP `list_world_sim_templates` | MCP `list_my_modules`, `get_world_sim_access` | |
 
 A tool that needs more access than you approved answers that it needs it; Claude Code may then
 ask you to approve again in the browser. If it doesn't, sign in again from `/mcp`, or use the
@@ -248,6 +249,7 @@ they belong in your own terminal or browser:
 - **Publishing publicly** and **rating** a session are web-app steps. Neither the CLI nor MCP lists
   a session publicly or submits a rating.
 - **Paying** happens only in your browser. No tool pays.
+- **World-Sims** aren't covered yet, because the MCP sign-in from Claude Code doesn't include them.
 - **Large sessions over MCP.** `publish_session` takes up to 2 MiB, so `/a4sx:save-summary` saves a
   summary; full transcripts go through the CLI (`/a4sx:publish`).
 

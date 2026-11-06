@@ -1,5 +1,5 @@
 ---
-description: Work with the user's private a4sx library - list and inspect saved sessions and their versions, suggest listing fields for selling one, delete a saved session, or sign the a4sx CLI out on this computer. Deleting and signing out run only after the user's explicit yes.
+description: Work with the user's private a4sx library - list and inspect saved sessions and their versions, delete a saved session, or sign the a4sx CLI out on this computer. Deleting and signing out run only after the user's explicit yes.
 argument-hint: "[list|show|draft|delete|logout] [id]"
 disable-model-invocation: true
 allowed-tools: Bash(printenv A4SX_HARNESS A4SX_MESH_SESSION) mcp__plugin_a4sx_a4sx__get_session_summary
@@ -24,11 +24,12 @@ exits with status 1, which is expected), go on.
   came from another author.
 - **Show one.** Call `get_session_summary` with `id` and `"source": "library"`: title, label,
   folder, tags, versions, sessions and dates.
-- **Suggest listing fields** for selling one of the user's own sessions. Call
-  `suggest_listing_draft` with `id`. It returns a suggested title, summary, tags and category,
-  built from fixed vocabularies and counts. It saves and publishes nothing. Show the draft and
-  say that listing it happens in the a4sx web app: the user edits the session's details there and
-  then takes the reviewed publish step. If the tool is not available, say so.
+- **Suggest listing fields** for selling one of the user's own sessions, when the server offers
+  it. Call `suggest_listing_draft` with `id`. It returns a suggested title, summary, tags and
+  category, built from fixed vocabularies and counts. It saves and publishes nothing. Show the draft
+  and say that listing it happens in the a4sx web app: the user edits the session's details there
+  and then takes the reviewed publish step. If the tool is unknown or not available, say that the
+  server doesn't offer listing suggestions right now; listing works in the web app without them.
 
 ## Change (only after an explicit yes)
 
@@ -37,9 +38,10 @@ exits with status 1, which is expected), go on.
   after, and there is no undo; copies already published to a workspace, and what buyers received,
   stay. Only after an explicit yes for that one entry, run `a4sx delete <id>` and report what the
   CLI said. One entry per yes; never delete several at once or by pattern.
-- **Sign out the a4sx CLI on this computer.** Say that `a4sx logout` revokes the stored CLI sign-in
-  on the server and removes it from this computer, and that the plugin's MCP sign-in is separate
-  (`/mcp` manages it). After an explicit yes, run `a4sx logout`. Never add `--all` unless the user
+- **Sign out the a4sx CLI on this computer.** Say that `a4sx logout` asks the server to revoke the
+  stored CLI sign-in (best effort: if the server can't be reached, it stays valid until it expires
+  or is revoked on session-exchange.com) and always removes it from this computer, and that the
+  plugin's MCP sign-in is separate (`/mcp` manages it). After an explicit yes, run `a4sx logout`. Never add `--all` unless the user
   asks for it by name; it also removes saved API keys and router tokens.
 
 Saving a new session or a new version is `/a4sx:publish` (or `/a4sx:save-summary` without the

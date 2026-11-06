@@ -44,8 +44,8 @@ and report the result.
 - **Make a profile the default.** Command: `a4sx profile --set-default <id>`. A plain `a4sx launch`
   uses it from then on.
 - **Delete a profile.** First say how many cells use it (from the list; "unknown" if not known), and
-  that a cell using it can't start until it gets another profile. Command:
-  `a4sx profile --delete <id>`.
+  that from then on those cells start with the default launch profile, or with a4sx's built-in
+  defaults if there is no default profile. Command: `a4sx profile --delete <id>`.
 
 **Other changes** (model, server address, headers, flags, env) print the whole profile, header
 values included, so don't run them here. Give the user the command for their own terminal, for

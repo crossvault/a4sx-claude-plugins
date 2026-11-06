@@ -47,8 +47,10 @@ the full transcript, use `/a4sx:publish` (needs the CLI).
    plugin's `a4sx` server and authenticate, then try once more. Never retry in a loop.
 
 4. **Report.** Give the library id (`library_id`), the version and the server's redaction count
-   (`server_redactions`), and say it is private. If the reply has `unprepared_carriers`, show its
-   `unprepared_note` to the user as information and say that copy should not be listed publicly.
+   (`server_redactions`), and say it is private. With `"format": "markdown"` the reply should not
+   have `unprepared_carriers`. If it does, don't show the server's note; say in your own words that
+   the saved copy still holds parts of a raw session the server doesn't remove, that it stays
+   private, and that this copy shouldn't be listed publicly.
 
 ## Rules
 

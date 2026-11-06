@@ -28,23 +28,21 @@ All notable changes to this project are listed here. Versions follow
 - README: examples, the Windows installer, what the plugin pre-approves, every service the new
   commands contact, and how purchases work (`request_purchase` charges nothing; the user confirms
   and pays in the browser; the plugin never pre-approves it).
-- `/a4sx:acquire`: adds a free listing to the library after the user's yes (MCP `acquire_session`,
-  or `a4sx acquire`). For a paid listing it starts a purchase request (`request_purchase`) only after
-  the user's yes, shows the link and code, and checks the result (`get_purchase_request`) only when
-  the user says they are done. The user confirms and pays in the browser.
+- `/a4sx:acquire`: adds a listing to the library after the user's yes (MCP `acquire_session`, or
+  `a4sx acquire`). Only when that answers that the listing is paid, it can start a purchase request
+  (`request_purchase`) after another yes, and shows the link and code. It checks the result
+  (`get_purchase_request`) once each time the user asks, never in a loop. The user confirms and pays
+  in the browser.
 - `/a4sx:save-summary`: Claude composes a markdown summary of this session, the user checks and
   approves it, and it is saved privately with MCP `publish_session` (`format=markdown`). No CLI
   needed; the transcript is not uploaded.
-- `/a4sx:library`: lists and shows saved sessions, suggests listing fields
-  (`suggest_listing_draft`), deletes a saved session (`a4sx delete`) and signs the CLI out
-  (`a4sx logout`); deleting and signing out only after the user's yes.
+- `/a4sx:library`: lists and shows saved sessions, deletes a saved session (`a4sx delete`) and signs
+  the CLI out (`a4sx logout`); deleting and signing out only after the user's yes.
 - `/a4sx:context`: loads a library session as reference material (`fetch_session_context`), never
   into instruction files.
 - `/a4sx:profiles`: lists and shows launch profiles (`a4sx profiles --json`, never header or env
   values) and copies, sets the default or deletes one after the user's yes. Other profile edits are
   given as commands for the user's terminal, because they print the whole profile.
-- `/a4sx:world-sim`: shows World-Sim templates, the user's World-Sims and how an agent gets access
-  (`list_world_sim_templates`, `list_my_modules`, `get_world_sim_access`). Read-only.
 - `/a4sx:search`: sort, tag and harness filters, and the rating, imports, version, verified and
   deprecated state in a listing's detail.
 - `/a4sx:mesh`: also shows a mesh's members, join requests and invites (never invite links).
