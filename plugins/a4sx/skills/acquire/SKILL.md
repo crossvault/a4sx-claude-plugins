@@ -34,16 +34,18 @@ never open a browser yourself, and never ask for payment details.
 
    Then go by the answer:
    - **added** (`status` is `acquired`, or the CLI prints a `collection`): report the library id and
-     go to step 4;
+     go to step 4. If the user already had this listing, the answer is the same and gives the id of
+     their existing copy;
    - **`payment_required`** (HTTP 402 from the CLI): the listing is paid and the user doesn't own it
      yet. Go to step 3;
    - **`not_a_session`**: the listing is reading material only and can't be added as a session; say
-     so and stop;
-   - **already owned** (HTTP 409 `already_owned`): say that the user already has it, and offer
-     `/a4sx:library` to find it.
+     so and stop.
 
-3. **Buy it, only if step 2 answered `payment_required`.** Tell the user the price (from the answer,
-   or `price_cents` divided by 100 with the `currency`) and how buying works:
+3. **Buy it, only if step 2 answered `payment_required`.** Buying goes through the MCP server, so it
+   needs the MCP sign-in even when step 2 used the CLI (`/mcp`, select the plugin's `a4sx` server,
+   authenticate). The other way is the listing page: give the user the `listing_url`, where they can
+   buy it in the browser themselves. Tell the user the price (from the answer, or `price_cents`
+   divided by 100 with the `currency`) and how buying works:
    - `request_purchase` starts a purchase request. It charges nothing and pays nothing.
    - It returns a confirmation link and a short code. The user opens the link in their browser,
      checks that the page shows the same code, the listing and the price, and only then confirms and
@@ -53,12 +55,18 @@ never open a browser yourself, and never ask for payment details.
    Ask whether to start the purchase request. Only after an explicit yes, call `request_purchase`
    with `id`, `tenant` and `version` (the version shown in step 1). Claude Code asks for permission
    first; this plugin never pre-approves it. Show the user the `verify_url`, the `user_code` and
-   when it expires, and keep the `purchase_request_id`. Don't open the link. If the answer says
-   `reused`, a purchase of this listing was already open: show that one's link and code.
+   when it expires, and keep the `purchase_request_id`. Don't open the link. If the server's
+   `message` says that a purchase of this listing was already open, say so: the link and code shown
+   are that open purchase's, and the user finishes it in the browser.
    - **`purchase_in_progress`** or **`checkout_open`**: a purchase of this listing is already
      waiting for the user's confirmation or payment. Tell them to finish it in the browser, or let it
      expire; don't start another one.
    - **`already_owned`**: the user owns it already; go back to step 2 once, if they want.
+   - **Any other refusal** (for example `version_not_on_sale`, `free_listing`, `own_listing`,
+     `not_for_sale`, `not_resumable`, `version_deprecated`, `too_many_pending` or `sales_paused`):
+     say in plain words what the server said, give the `listing_url`, and don't retry. For
+     `version_not_on_sale` only, you may offer to start again with the version on sale
+     (`details.on_sale`); call `request_purchase` with it only after a new explicit yes.
 
    Check the status only when the user asks (for example "I've paid"): call `get_purchase_request`
    with the `purchase_request_id` once per time they ask. Never poll and never check in a loop.
