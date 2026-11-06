@@ -2,7 +2,7 @@
 description: Save the current Claude Code session to the user's private a4sx library with the official a4sx CLI. Private by default; nothing is listed publicly.
 argument-hint: "[title]"
 disable-model-invocation: true
-allowed-tools: Bash(a4sx version) Bash(a4sx push --dry-run *)
+allowed-tools: Bash(printenv A4SX_HARNESS A4SX_MESH_SESSION) Bash(a4sx version) Bash(a4sx push --dry-run *)
 ---
 
 # Save this session to your private a4sx library
@@ -16,14 +16,22 @@ scrubs it again before storing it.
 
 ## Steps
 
+0. **Check where this runs.** Run `printenv A4SX_HARNESS A4SX_MESH_SESSION`. If it prints anything,
+   this Claude Code session runs inside an a4sx session: in a mesh cell the a4sx CLI can't read the
+   user's sign-in, and in an `a4sx launch --ipc-proxy` session its saved state is read-only. Stop,
+   and tell the user to save it in their own terminal, outside the a4sx session. If it prints
+   nothing (it then exits with status 1, which is expected), go on.
+
 1. **Check the CLI.** Run `a4sx version`. If the command is not found, stop and tell the user to
-   install it in a terminal (it needs `python3` and `curl`):
+   install it in a terminal (it needs Python 3.10 or newer); `/a4sx:setup` shows how:
 
    ```
    curl -fsSL https://session-exchange.com/install.sh | sh
    ```
 
-   Do not run the installer yourself unless the user asks you to.
+   On Windows (PowerShell): `irm https://session-exchange.com/install.ps1 | iex`.
+   Do not run the installer yourself unless the user asks you to. Without the CLI, the user can save
+   a written summary of this session instead, with `/a4sx:save-summary`.
 
 2. **Find the transcript.** Claude Code stores this session as
    `~/.claude/projects/<project-folder>/${CLAUDE_SESSION_ID}.jsonl` (under `$CLAUDE_CONFIG_DIR/projects/`
