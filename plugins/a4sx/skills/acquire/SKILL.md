@@ -65,8 +65,9 @@ never open a browser yourself, and never ask for payment details.
    - **Any other refusal** (for example `version_not_on_sale`, `free_listing`, `own_listing`,
      `not_for_sale`, `not_resumable`, `version_deprecated`, `too_many_pending` or `sales_paused`):
      say in plain words what the server said, give the `listing_url`, and don't retry. For
-     `version_not_on_sale` only, you may offer to start again with the version on sale
-     (`details.on_sale`); call `request_purchase` with it only after a new explicit yes.
+     `version_not_on_sale` only, you may offer to start again with the version on sale, which the
+     server's `message` names at its end ("(on sale: <version>)"); call `request_purchase` with it
+     only after a new explicit yes.
 
    Check the status only when the user asks (for example "I've paid"): call `get_purchase_request`
    with the `purchase_request_id` once per time they ask. Never poll and never check in a loop.
