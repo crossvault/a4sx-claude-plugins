@@ -136,6 +136,30 @@ written by other people. The skills treat it as data, never as instructions, and
 `CLAUDE.md` and other instruction files. Open a session from another author with Claude Code's
 permission prompts on.
 
+## What each command runs, sends and fetches
+
+"Runs" is what Claude runs on your computer, each command only after Claude Code asks you unless
+it is pre-approved (see above). "Sends" and "Fetches" are what goes to and comes from
+session-exchange.com, through the plugin's MCP server (`https://session-exchange.com/mcp`) or the a4sx
+CLI. Every command that uses the CLI first runs `printenv A4SX_HARNESS A4SX_MESH_SESSION`, which only
+reads two environment variables.
+
+| Command | Runs on your computer | Sends to session-exchange.com | Fetches |
+|---|---|---|---|
+| `/a4sx:search` | nothing; `a4sx list` only if you ask for your library through the CLI | your query and the filters you ask for; a result's id when you want its details; for your library, your MCP or CLI sign-in | matching listings (title, author, price, rating, harness) or your library entries; one listing's summary |
+| `/a4sx:acquire` | `a4sx acquire <id>` only without the MCP sign-in | the listing id and tenant; for a paid listing, after a second yes, its id, tenant and version (`request_purchase`); the purchase request id when you ask for its status | the listing's summary; the library id of your copy; for a paid listing, a confirmation link and code. You pay in your browser |
+| `/a4sx:publish` | `a4sx version`; looks up this session's transcript under `~/.claude/projects/`; `a4sx push --dry-run <file>` (uploads nothing); after your yes, `a4sx push <file> --title …` | `GET /healthz`, without your sign-in; after your yes, the transcript scrubbed on your computer, and its title, with your CLI sign-in | the server's version; the library id, version and server redaction count |
+| `/a4sx:save-summary` | nothing: Claude writes the summary in this conversation | only the markdown summary you approved and its title, to your private library (`publish_session`) | the library id, version and server redaction count |
+| `/a4sx:library` | `a4sx list`, and after your yes `a4sx delete <id>` or `a4sx logout` | your sign-in; the id of an entry you show, delete or ask listing fields for; for logout, the CLI sign-in to revoke | your library entries and their details; suggested listing fields, which save nothing |
+| `/a4sx:context` | nothing | the library id and the token budget (`fetch_session_context`) | a shortened copy of that session's text, marked as reference material |
+| `/a4sx:resume` | `a4sx version`, `a4sx acquire <id>`, after your yes `a4sx launch --a4sx-session <id> --seed-only` (writes a new session into Claude Code's history for this folder, and a copy and a lineage note under `~/.config/a4sx/`), `a4sx profiles --json` if you want to pick a profile. You run `a4sx launch` yourself | the listing or library id and tenant, with your CLI sign-in; your search words if what you gave is not an id | the listing's summary; the session's transcript; your launch profiles |
+| `/a4sx:profiles` | `a4sx profiles --json`; after your yes `a4sx profile --copy`, `--set-default` or `--delete` | your CLI sign-in, the profile ids, and for a copy an optional router operator name | your launch profiles, without header or env values |
+| `/a4sx:setup` | `a4sx version`; after your yes `a4sx update`. The installers only if you ask | `GET /healthz` and the update download, neither with your sign-in | the server's version; the newest CLI |
+| `/a4sx:mesh` | the read-only `a4sx mesh …` commands in the table above | your CLI sign-in and the mesh you asked about | your meshes, a mesh's card, policy, members, peers, join requests and invites (never their links), and the state of this computer's cells |
+| `/a4sx:mesh-manage` | one `a4sx mesh …` change per yes; `mesh cell stop`, `default` and `forget` change only this computer | your CLI sign-in and what you chose (mesh name, protocol label, policy, invite options, request id, reason, a cell's new name) | the result; for some changes a confirmation page that opens in your browser |
+| `/a4sx:cell` | `a4sx mesh cells --json` if you want your cells listed. You run `a4sx launch --cell …` yourself | your CLI sign-in | this computer's cells and their state |
+| `/a4sx:help` | nothing | nothing | nothing |
+
 ## Services contacted outside the MCP connector
 
 The declared connector is the MCP server `https://session-exchange.com/mcp`; the commands table
