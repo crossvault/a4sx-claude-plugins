@@ -136,6 +136,39 @@ written by other people. The skills treat it as data, never as instructions, and
 `CLAUDE.md` and other instruction files. Open a session from another author with Claude Code's
 permission prompts on.
 
+## What each command runs, sends and fetches
+
+With the plugin enabled, Claude Code connects to the plugin's MCP server
+(`https://session-exchange.com/mcp`) when a session starts, to list its tools. It sends your MCP
+sign-in, if you have one, with that request and with every MCP tool call. No command has to run for
+this.
+
+The columns:
+- **Runs** is what Claude runs on your computer. Each command runs only after Claude Code asks you,
+  unless it is pre-approved (see above).
+- **Sends** and **Fetches** are what goes to and comes from session-exchange.com, through that MCP
+  server or the a4sx CLI.
+
+Every command that uses the CLI first runs `printenv A4SX_HARNESS A4SX_MESH_SESSION`, which only reads
+two environment variables. `a4sx version` sends `GET /healthz` without your sign-in and gets back the
+server's version.
+
+| Command | Runs on your computer | Sends to session-exchange.com | Fetches |
+|---|---|---|---|
+| `/a4sx:search` | nothing; `a4sx list` only if you ask for your library through the CLI | your query and the filters you ask for (`search_sessions`). For a result's details: its id with its `tenant`, or with `"source": "library"` (`get_session_summary`). For your library: your MCP sign-in, or your CLI sign-in with `a4sx list` | matching listings (title, author, price, rating, harness) or your library entries; the summary of one listing or library entry |
+| `/a4sx:acquire` | `a4sx acquire <id> --tenant <tenant>`, only without the MCP sign-in | the listing id and tenant (`get_session_summary`). After your yes, the same with your MCP sign-in (`acquire_session`) or your CLI sign-in (`a4sx acquire`). For a paid listing, after a second yes, its id, tenant and version (`request_purchase`). When you ask for its status, the purchase request id (`get_purchase_request`). Both purchase calls go with your MCP sign-in | the listing's summary; the library id of your copy; for a paid listing, a confirmation link and code. You pay in your browser |
+| `/a4sx:publish` | `a4sx version`; looks up this session's transcript under `~/.claude/projects/`; `a4sx push --dry-run <file>` (uploads nothing); after your yes, `a4sx push <file> --title …` | `GET /healthz`, without your sign-in. After your yes, with your CLI sign-in: the transcript, scrubbed on your computer; its title; the scrub mode; and, for a session you continued from your library, the id and version it came from (lineage) | the server's version; the library id, version and server redaction count |
+| `/a4sx:save-summary` | nothing: Claude writes the summary in this conversation | only the markdown summary you approved and its title, to your private library, with your MCP sign-in (`publish_session`) | the library id, version and server redaction count |
+| `/a4sx:library` | `a4sx list`; after your yes, `a4sx delete <id>` or `a4sx logout` | with your MCP sign-in: a library search, and the id of an entry you show or ask listing fields for (`search_sessions`, `get_session_summary`, `suggest_listing_draft`). With your CLI sign-in: `a4sx list`, the id of the entry to delete, and for logout the CLI sign-in to revoke | your library entries and their details; suggested listing fields, which save nothing |
+| `/a4sx:context` | nothing | the library id, the token budget, and `include_tool_calls` if you ask for the tool calls, with your MCP sign-in (`fetch_session_context`) | a shortened copy of that session's text, marked as reference material |
+| `/a4sx:resume` | `a4sx version`; `a4sx acquire <id> --tenant <tenant>`; after your yes, `a4sx launch --a4sx-session <id> --seed-only`, which writes a new session into Claude Code's history for this folder and a copy and a lineage note under `~/.config/a4sx/`; `a4sx profiles --json` if you want to pick a profile. You run `a4sx launch` yourself | `GET /healthz`, without your sign-in; the listing id and tenant (`get_session_summary`); with your CLI sign-in, the listing id and tenant (`a4sx acquire`), the library id (`--seed-only`) and the profile list request; your search words if what you gave is not an id | the server's version; the listing's summary; the session's transcript; your launch profiles, whose header and env values the CLI receives but never prints |
+| `/a4sx:profiles` | `a4sx profiles --json`; after your yes, `a4sx profile --copy`, `--set-default` or `--delete` | your CLI sign-in and the profile ids. For a copy: the whole source profile, sent back as the new profile with its header and env values, and an optional router operator name | your launch profiles; the CLI receives their header and env values but never prints them |
+| `/a4sx:setup` | `a4sx version`; after your yes, `a4sx update`. The installers only if you ask | `GET /healthz` and the update download, neither with your sign-in | the server's version; the newest CLI |
+| `/a4sx:mesh` | the read-only `a4sx mesh …` commands in the table above | your CLI sign-in and the mesh you asked about; for `a4sx mesh cells --json`, the mesh ids of this computer's cells | your meshes, a mesh's card, policy, members, peers, join requests and invites (never their links), and the state of this computer's cells |
+| `/a4sx:mesh-manage` | one `a4sx mesh …` change per yes; `mesh cell stop`, `default` and `forget` change only this computer | your CLI sign-in and what you chose: mesh name, protocol label, policy, invite options (among them another person's e-mail address with `--email`, and a `--note` shown to them), request id, reason, a cell's new name | the result; for some changes, a confirmation page that opens in your browser |
+| `/a4sx:cell` | `a4sx mesh cells --json` if you want your cells listed. You run `a4sx launch --cell …` yourself | your CLI sign-in and the mesh ids of this computer's cells | this computer's cells and their state |
+| `/a4sx:help` | nothing | nothing | nothing |
+
 ## Services contacted outside the MCP connector
 
 The declared connector is the MCP server `https://session-exchange.com/mcp`; the commands table
@@ -148,17 +181,17 @@ provider in your launch profile.
 | Skill | Route | What is sent | When |
 |---|---|---|---|
 | `/a4sx:publish`, `/a4sx:resume`, `/a4sx:setup` | `a4sx version`: `GET /healthz` on session-exchange.com | nothing about you: no sign-in, no data | when the skill checks the CLI (pre-approved) |
-| `/a4sx:publish` | `a4sx push` to the session-exchange.com API | this session's transcript, scrubbed on your machine first, plus the title you choose | only after a `a4sx push --dry-run` preview (which sends nothing), and only after Claude Code asks you: the upload is not pre-approved |
+| `/a4sx:publish` | `a4sx push` to the session-exchange.com API | this session's transcript, scrubbed on your machine first, plus the title you choose, the scrub mode and, for a session you continued from your library, the id and version it came from (lineage) | only after a `a4sx push --dry-run` preview (which sends nothing), and only after Claude Code asks you: the upload is not pre-approved |
 | `/a4sx:resume`, `/a4sx:acquire` | `a4sx acquire` to the session-exchange.com API | the listing id (and tenant) you chose, and your CLI sign-in | only after Claude Code asks you |
 | `/a4sx:resume` | `a4sx launch --a4sx-session … --seed-only`: downloads the session from session-exchange.com | the library id and your CLI sign-in | only after your yes and Claude Code's question |
-| `/a4sx:resume`, `/a4sx:profiles` | `a4sx profiles --json` to the session-exchange.com API | your CLI sign-in | after Claude Code asks you |
-| `/a4sx:profiles` | `a4sx profile --copy`, `--set-default` and `--delete` to the session-exchange.com API | your CLI sign-in, the profile ids, and for a copy an optional router operator name | only after your yes and Claude Code's question |
+| `/a4sx:resume`, `/a4sx:profiles` | `a4sx profiles --json` to the session-exchange.com API; it receives the profiles with their header and env values and never prints those values | your CLI sign-in | after Claude Code asks you |
+| `/a4sx:profiles` | `a4sx profile --copy`, `--set-default` and `--delete` to the session-exchange.com API | your CLI sign-in and the profile ids; for a copy, the whole source profile, header and env values included, sent back as the new profile, and an optional router operator name | only after your yes and Claude Code's question |
 | `/a4sx:search`, `/a4sx:library` | `a4sx list` to the session-exchange.com API | your CLI sign-in | only if you ask for your library through the CLI, after Claude Code asks you |
 | `/a4sx:library` | `a4sx delete` to the session-exchange.com API | your CLI sign-in and the id of the entry to delete | only after your yes and Claude Code's question |
 | `/a4sx:library` | `a4sx logout`: asks session-exchange.com to revoke the CLI sign-in (best effort), then removes it from this computer in any case | your CLI sign-in, to revoke it | only after your yes and Claude Code's question |
 | `/a4sx:setup` | `a4sx update`: downloads the newest CLI from session-exchange.com | nothing: a download, without your sign-in | only after your yes and Claude Code's question |
 | `/a4sx:mesh` | `a4sx mesh list`, `mesh show`, `mesh policy` (show only), `mesh members`, `mesh peers`, `mesh requests` and `mesh invite --list` to the session-exchange.com API | your CLI sign-in and the mesh you asked about | each only after Claude Code asks you |
-| `/a4sx:mesh`, `/a4sx:cell` | `a4sx mesh cells --json`: reads the cells stored on this computer and asks session-exchange.com about them | your CLI sign-in | each only after Claude Code asks you |
+| `/a4sx:mesh`, `/a4sx:cell` | `a4sx mesh cells --json`: reads the cells stored on this computer and asks session-exchange.com about them | your CLI sign-in and the mesh ids of this computer's cells | each only after Claude Code asks you |
 | `/a4sx:mesh-manage` | `a4sx mesh create`, `mesh invite`, `mesh invite --revoke`, `mesh approve` and `mesh policy <mesh> <policy>` to the session-exchange.com API; some open a confirmation page in your browser | your CLI sign-in and what you chose (mesh name, protocol label, policy, invite options, request id, reason) | only after your yes and Claude Code's question |
 | `/a4sx:mesh-manage` | `a4sx mesh cell rename` to the session-exchange.com API; `mesh cell stop`, `mesh cell default` and `mesh cell forget` stay on this computer | your CLI sign-in, the cell and its new name | only after your yes and Claude Code's question |
 | `/a4sx:publish`, `/a4sx:resume`, `/a4sx:setup` | the CLI installers `https://session-exchange.com/install.sh` and `install.ps1` | nothing: a download | only if you run them, or ask Claude to; the skills don't run them on their own |
